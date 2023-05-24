@@ -6,30 +6,37 @@ public class WiimoteIRObjectMovement : MonoBehaviour {
     private Wiimote wiimote;    
     public RectTransform ir_pointer;
 
-    public RectTransform[] ir_dots;  //public array for ir sensor calibration
-    public RectTransform[] ir_bb;  //public array for ir sensor calibration
+    // public array for ir sensor calibration
+    public RectTransform[] ir_dots;
+    // public array for ir sensor calibration  
+    public RectTransform[] ir_bb;  
 
-    public float upScaling; //public float to change the area of usable 3D space for ir sensor
+    // public float to change the area of usable 3D space for ir sensor
+    public float upScaling; 
 
     public GameObject AudioManager;
 
-    public int Buffer = 5; //public in to change time a player has after leaving an animal object
-
-    //public GameManager gameManager;
-
-    public bool destroySound = false; //Might not do anything, else, the bool is for ensuring that the sound is destroyed
+    // public in to change time a player has after leaving an animal object
+    public int Buffer = 5; 
 
     public SoundPlayer soundPlayer;
 
-    void Start() { //WiimoteAPI code for enabling wiimote within Unity
-        WiimoteManager.FindWiimotes(); // look for available Wiimotes
-        wiimote = WiimoteManager.Wiimotes[0]; // use the first Wiimote found
-        wiimote.SendPlayerLED(true, false, false, false); // turn on the first LED
-        wiimote.SendDataReportMode(InputDataType.REPORT_BUTTONS_ACCEL_IR10_EXT6); // Set the input data report mode to IR
-        wiimote.SetupIRCamera(IRDataType.BASIC); // set up the IR camera to track 2 IR dots
+    // WiimoteAPI code for enabling the Wii remote within Unity
+    void Start() { 
+        // look for available Wiimotes
+        WiimoteManager.FindWiimotes(); 
+        // use the first Wiimote found
+        wiimote = WiimoteManager.Wiimotes[0]; 
+        // turn on the first LED
+        wiimote.SendPlayerLED(true, false, false, false); 
+        // Set the input data report mode to IR
+        wiimote.SendDataReportMode(InputDataType.REPORT_BUTTONS_ACCEL_IR10_EXT6); 
+        // set up the IR camera to track 2 IR dots
+        wiimote.SetupIRCamera(IRDataType.BASIC); 
     }
 
-    public Vector2 irSensorData() { //More WiimoteAPI code for calculating IRSensor data into a vector2
+    // WiimoteAPI code for calculating IRSensor data into a vector2
+    public Vector2 irSensorData() { 
         float[,] ir = wiimote.Ir.GetProbableSensorBarIR();
         for (int i = 0; i < 2; i++) {
 
@@ -62,7 +69,7 @@ public class WiimoteIRObjectMovement : MonoBehaviour {
     }
 
     void Update() {
-        if (wiimote != null && wiimote.current_ext != ExtensionController.MOTIONPLUS) { // check if the Wii Motion Plus extension is connected
+        if (wiimote != null && wiimote.current_ext != ExtensionController.MOTIONPLUS) { // check if the Wii Motion Plus extension is connected                                                          
             int ret;
             do { ret = wiimote.ReadWiimoteData(); // Read the latest data from the Wii remote
             } while (ret > 0); // Keep reading until all available data has been retrieved
@@ -71,69 +78,71 @@ public class WiimoteIRObjectMovement : MonoBehaviour {
             Vector2 v2 = irSensorData();
             Vector3 v3 = new Vector3(v2.x, v2.y, 0);
 
-            // used to move a cube on screen for developers to visualize irSensorData
+            // used to move a cube("cursor") on screen via v3
             transform.position = v3 * upScaling;
 
             //Functions to enable and disable rumble on command. Useful when remote is in a rumble loop
             if (Input.GetKeyDown(KeyCode.S)) {
-                wiimote.RumbleOn = true; // Enabled Rumble
-                wiimote.SendStatusInfoRequest(); // Requests Status Report, encodes Rumble into input report
+                // Enabled Rumble
+                wiimote.RumbleOn = true; 
+                // Requests Status Report, encodes Rumble into input report
+                wiimote.SendStatusInfoRequest(); 
             }
             if (Input.GetKeyUp(KeyCode.S)) {
-                wiimote.RumbleOn = false; // Disabled Rumble
-                wiimote.SendStatusInfoRequest(); // Requests Status Report, encodes Rumble into input report
+                // Disabled Rumble
+                wiimote.RumbleOn = false; 
+                // Requests Status Report, encodes Rumble into input report
+                wiimote.SendStatusInfoRequest(); 
             }
         }
     }
 
-    /*void UpdateBool() {
-        GameObject g = GameObject.FindGameObjectWithTag("GameManager");
-        soundPlayer.toggle = g.GetComponent<GameManager>();
-        soundPlayer.toggle = true;
-
-        gameObject.GetComponent<SoundPlayer>().PlaySound();
-    }*/
-
     void OnCollisionStay(Collision collision) {
-        if (collision.gameObject.tag == "Animal") { //Only check for objects tagged with "Animal"
-            wiimote.RumbleOn = true; // Enabled Rumble
-            wiimote.SendStatusInfoRequest(); // Requests Status Report, encodes Rumble into input report
+        // Only check for objects tagged with "Animal"
+        if (collision.gameObject.tag == "Animal") { 
+            // Enabled Rumble
+            wiimote.RumbleOn = true; 
+            // Requests Status Report, encodes Rumble into input report
+            wiimote.SendStatusInfoRequest(); 
 
-            if (wiimote.Button.a || wiimote.Button.b) { //Enables the following function if either "A" or "B" is pressed on the wiimote
-                //Was used to test functionality
-                //Debug.Log("'A' button pressed!!");
-
-                //UpdateBool();
-
-                destroySound = true; //Again, might not do anything, else, tells the program that the sound is indeed destroyed
-
-                Destroy(collision.gameObject); //Destroys the collided object
-
-                AudioManager.GetComponent<AudioManager>().PlayFoundSound(); //Plays a "FoundSound" which is a ding
+            // Enables the following function if either "A" or "B" is pressed on the wiimote
+            if (wiimote.Button.a || wiimote.Button.b) { 
+                // Destroys the collided object
+                Destroy(collision.gameObject); 
+                // Plays a "FoundSound" which is a ding
+                AudioManager.GetComponent<AudioManager>().PlayFoundSound(); 
 
                 if (wiimote.RumbleOn) {
-                    wiimote.RumbleOn = false; //Turns off rumble
-                    wiimote.SendStatusInfoRequest(); //Sends the information to the Wiimote to turn off rumble
+                    // Turns off rumble
+                    wiimote.RumbleOn = false; 
+                    // Sends the information to the Wiimote to turn off rumble
+                    wiimote.SendStatusInfoRequest(); 
                 }
             }
-            StartCoroutine(LingerAPress(collision)); //Starts coroutine which continues the previous function        
+            // Starts coroutine which continues the previous function
+            StartCoroutine(LingerAPress(collision));         
         }
     }
 
     void OnCollisionExit(Collision collision) {
-        StartCoroutine(LingerRumble(collision)); //Starts coroutine when leaving an object 
+        // Starts coroutine when leaving an object
+        StartCoroutine(LingerRumble(collision));  
     }
 
     IEnumerator LingerRumble(Collision collision) {
-        yield return new WaitForSeconds(0.1f * Buffer); // wait for 0.1 seconds times the buffered amount
+        // wait for 0.1 seconds times the buffered amount
+        yield return new WaitForSeconds(0.1f * Buffer); 
         if (collision.gameObject.tag == "Animal") {
-            wiimote.RumbleOn = false; // Disabled Rumble
-            wiimote.SendStatusInfoRequest(); // Requests Status Report, encodes Rumble into input report
+            // Disabled Rumble
+            wiimote.RumbleOn = false; 
+            // Requests Status Report, encodes Rumble into input report
+            wiimote.SendStatusInfoRequest(); 
         }
     }
 
-    IEnumerator LingerAPress(Collision collision){
-        for (int i = 0; i < Buffer; i++) { //For loop that loops times the buffered amount 
+    IEnumerator LingerAPress(Collision collision) {
+        // For loop that loops times the buffered amount
+        for (int i = 0; i < Buffer; i++) {  
             // Code to be repeated.
 
             yield return new WaitForSeconds(0.1f); // wait for 0.1 seconds times the amount of loops

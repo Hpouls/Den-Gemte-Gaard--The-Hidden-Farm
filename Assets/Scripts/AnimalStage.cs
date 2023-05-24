@@ -6,84 +6,111 @@ public class AnimalStage : MonoBehaviour {
     private GameObject gameManager; 
     private GameObject soundPlane; 
 
-    public AudioClipScriptableObject[] intro; // array for AudioClipScriptableObjects to be played before animals are destroyed
-    public AudioClipScriptableObject[] outro; // array for AudioClipScriptableObjects to be played after animals are destroyed
+    // array for AudioClipScriptableObjects to be played before animals are destroyed
+    public AudioClipScriptableObject[] intro;
+    // array for AudioClipScriptableObjects to be played after animals are destroyed 
+    public AudioClipScriptableObject[] outro; 
 
     private AudioSource audioSource; 
 
     public static SceneState State;
 
-    public static bool animalFound; // bool for updating if an animal is found or not
+    // bool for updating if an animal is found or not
+    public static bool animalFound; 
 
-    public float seconds; // public float for waiting amount of time before playing another audioclip
+    // public float for waiting amount of time before playing another audioclip
+    public float seconds; 
 
     public WiimoteIRObjectMovement wiimoteIRObjectMovement;
 
 
     // Start is called before the first frame update
     void Start() {
-        soundPlane = GameObject.FindGameObjectWithTag("SoundPlane"); // might not do anything, else, asigns "SoundPlane" to soundPlane within script
-        gameManager = GameObject.FindGameObjectWithTag("GameManager"); // might not do anything, else, asigns "GameManager" to gameManager within script
+        // might not do anything, else, asigns "SoundPlane" to soundPlane within script
+        soundPlane = GameObject.FindGameObjectWithTag("SoundPlane"); 
+        // might not do anything, else, asigns "GameManager" to gameManager within script
+        gameManager = GameObject.FindGameObjectWithTag("GameManager"); 
         animalFound = false;
-        State = SceneState.Intro; // starts first scenestate 
-        StartCoroutine(PlaySounds(State)); // starts coroutine 
+        // starts first scenestate 
+        State = SceneState.Intro; 
+        // starts coroutine 
+        StartCoroutine(PlaySounds(State)); 
     }
 
     private void Update() {
         if(soundPlane == null) {
-            soundPlane = GameObject.FindGameObjectWithTag("SoundPlane"); // saftey-net function to make sure objects exist 
+            // saftey-net function to make sure objects exist 
+            soundPlane = GameObject.FindGameObjectWithTag("SoundPlane"); 
         }
         if (gameManager == null) {
-            gameManager = GameObject.FindGameObjectWithTag("GameManager"); // saftey-net function to make sure objects exist 
+            // saftey-net function to make sure objects exist
+            gameManager = GameObject.FindGameObjectWithTag("GameManager");  
         }
 
-        int numberOfObjectsSpawned = soundPlane.GetComponent<ObjectSpawner>().getNumberOfSpawnedObjects(); // checks for objects within soundPlane and translates the amount of objects into an int
-        if (numberOfObjectsSpawned <= 0) { // if there are no objects set animalFound to true 
+        // checks for objects within soundPlane and translates the amount of objects into an int
+        int numberOfObjectsSpawned = soundPlane.GetComponent<ObjectSpawner>().getNumberOfSpawnedObjects(); 
+        // if there are no objects set animalFound to true 
+        if (numberOfObjectsSpawned <= 0) { 
             animalFound = true;
         }
     }
 
     public IEnumerator PlaySounds(SceneState State) { 
         while (true) { 
-            audioSource = GetComponent<AudioSource>(); // gets audiosource
-            SceneState newState = State;  // 
+            // gets audiosource
+            audioSource = GetComponent<AudioSource>(); 
+            SceneState newState = State;
 
-            switch (newState) { // switch case for the states each animalstage goes through
-                case SceneState.Intro: // first case to play
+            // switch case for the states each animalstage goes through
+            switch (newState) { 
+                // first case to play
+                case SceneState.Intro: 
 
-                    for (int i = 0; i < intro.Length; i++) { // for loop to have the intro arrays lenght 
-                        this.audioSource.clip = intro[i].AudioClip; //gets the audiosource from intro
-                        this.audioSource.Play(); // plays the gotten audiosourec
-                        yield return new WaitForSeconds(this.audioSource.clip.length); // wait untill audiosource has played its full amount
+                    // for loop to have the intro arrays lenght 
+                    for (int i = 0; i < intro.Length; i++) { 
+                        // gets the audiosource from intro
+                        this.audioSource.clip = intro[i].AudioClip;
+                        // plays the gotten audiosource
+                        this.audioSource.Play(); 
+                        // wait untill audiosource has played its full amount
+                        yield return new WaitForSeconds(this.audioSource.clip.length);
                     }
                     State = SceneState.FindAnimal;
                     break;
 
                 case SceneState.FindAnimal:
-                    while (animalFound == false) {  // checks to see if the animals are sitll on screen
-                        //Debug.Log("Heye");
-                        GameObject animal = gameManager.GetComponent<GameManager>().FindClosestAnimal(GameObject.Find("Cursor")); // finds the closest animal object in relation to the "Cursor"
-                        AudioSource audioSource = animal.GetComponent<SoundPlayer>().GetAudioSource(); // gets audiosource on the closest animal
-                        audioSource.Play(); // play audiosource
-
-                        while (animal != null && audioSource.isPlaying) { //
+                    // checks to see if the animals are sitll on screen
+                    while (animalFound == false) {  
+                        // finds closest animal object to "Cursor"
+                        GameObject animal = 
+                        gameManager.GetComponent<GameManager>().FindClosestAnimal(GameObject.Find("Cursor")); 
+                        // gets audiosource on the closest animal
+                        AudioSource audioSource = animal.GetComponent<SoundPlayer>().GetAudioSource(); 
+                        // play audiosource
+                        audioSource.Play(); 
+                        while (animal != null && audioSource.isPlaying) {
                             yield return new WaitForSeconds(0.5f);
                         }
-
-                        yield return new WaitForSeconds(seconds); // waits for amount of time before starting next sound
+                        // waits for amount of time before starting next sound
+                        yield return new WaitForSeconds(seconds); 
                     }
-                    State = SceneState.Outro; // only goes to next state when "animalFound" is equal to true
+                    // only goes to next state when "animalFound" is equal to true
+                    State = SceneState.Outro; 
                     break;
 
                 case SceneState.Outro:
-                    for (int i = 0; i < outro.Length; i++) { // for loop to have the outro arrays lenght 
-                        this.audioSource.clip = outro[i].AudioClip; // gets audioclips from outro
-                        this.audioSource.Play(); // plays audioclips 
-                        yield return new WaitForSeconds(this.audioSource.clip.length); // wait until audio clips is finished
+                    // for loop to have the outro arrays lenght
+                    for (int i = 0; i < outro.Length; i++) {  
+                        // gets audioclips from outro
+                        this.audioSource.clip = outro[i].AudioClip; 
+                        // plays audioclips 
+                        this.audioSource.Play(); 
+                        // wait until audio clips is finished
+                        yield return new WaitForSeconds(this.audioSource.clip.length); 
                     }
                     gameManager.GetComponent<GameManager>().UpdateGameState();
-                    Destroy(gameObject); // might not do anything, else, destroys object
-
+                    // might not do anything, else, destroys object
+                    Destroy(gameObject); 
                     break;
             }
         }

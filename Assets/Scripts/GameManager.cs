@@ -56,7 +56,7 @@ public class GameManager : MonoBehaviour {
             case 5: //cow
                 soundPlane.GetComponent<ObjectSpawner>().objectToSpawn = animals[0];
                 soundPlane.GetComponent<ObjectSpawner>().SpawnXNumberOfObjects(3);
-                Instantiate(CowStage, position, Quaternion.identity);
+                Instantiate(CowStage, position, Quaternion.identity); // instatiates the object set onto CowStage at a vector 0 (position & with the posibility to rotate
                 AnimalStage --;
                 break;
             case 4: //sheep

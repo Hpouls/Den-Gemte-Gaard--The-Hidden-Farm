@@ -1303,7 +1303,7 @@ MonoBehaviour:
     type: 3}
   PigStage: {fileID: 7665692815349990750, guid: b6af387a09b2e1143a2a668e0083588a,
     type: 3}
-  AnimalStage: 5
+  AnimalStage: 1
   seconds: 1
   wiimoteIRObjectMovement: {fileID: 512684791}
 --- !u!4 &1821874311
