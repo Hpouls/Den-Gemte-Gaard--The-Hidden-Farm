@@ -1,4 +1,4 @@
-# ThisIsTheRightVersionOfDenGemteGaard
+# Den Gemte Gaard (The Hidden Farm)
 
 ## Description
 **This project is a *Pain Distraction* game that is aimed towards children that undergo venipuncture procedures.**
